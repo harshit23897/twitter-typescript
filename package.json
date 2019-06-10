@@ -1,0 +1,31 @@
+{
+  "name": "twitter-typescript",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "clean": "rimraf dist/*",
+    "lint": "tslint -c tslint.json -p tsconfig.json --fix",
+    "tsc": "tsc",
+    "build": "npm-run-all clean lint tsc",
+    "dev:start": "npm-run-all build start",
+    "dev": "nodemon --watch src -e ts",
+    "start": "node .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "tsc-watch": "^2.2.1"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.0",
+    "@types/node": "^12.0.7",
+    "express": "^4.17.1",
+    "nodemon": "^1.19.1",
+    "npm-run-all": "^4.1.5",
+    "tslint": "^5.17.0",
+    "typescript": "^3.5.1"
+  }
+}
