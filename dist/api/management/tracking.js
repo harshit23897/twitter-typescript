@@ -19,8 +19,9 @@ const connect = __importStar(require("../services/connect"));
 const User_1 = require("../../models/User");
 class Tracking {
     routes(app) {
+        // Add a verified user to database.
         app
-            .route("/api/user/add")
+            .route("/api/users/add")
             .post((req, res) => __awaiter(this, void 0, void 0, function* () {
             const handle = req.body.handle;
             this.checkVerifiedUser(handle)
@@ -55,6 +56,24 @@ class Tracking {
                 return res.status(400).json("Some error occured.");
             });
         }));
+        // Return list of all verified users.
+        app
+            .route("/api/users/show")
+            .get((req, res) => {
+            const users = User_1.User.find({})
+                .then((result) => {
+                const names = [];
+                for (const row in result) {
+                    if (result.hasOwnProperty(row)) {
+                        names.push(result[row].name);
+                    }
+                }
+                return res.status(200).json(names);
+            })
+                .catch((error) => {
+                return res.status(400).json("Some error occured");
+            });
+        });
     }
     checkVerifiedUser(handle) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -63,8 +82,6 @@ class Tracking {
                 // Check if the user is a verified user.
                 connect.client.get("users/show", params, (error, tweets, response) => {
                     if (!error) {
-                        // tslint:disable-next-line:no-console
-                        // console.log(tweets.verified === true ? true : false);
                         resolve(tweets.verified === true ? true : false);
                     }
                     else {
