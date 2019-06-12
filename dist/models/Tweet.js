@@ -9,5 +9,6 @@ const TweetSchema = new mongoose_2.Schema({
     tweet: { type: String, required: true },
     user: { type: mongoose_2.Schema.Types.ObjectId, required: true }
 });
+TweetSchema.index({ $text: { $tweet: "text" } });
 exports.Tweet = mongoose_1.default.model("Tweet", TweetSchema);
 //# sourceMappingURL=Tweet.js.map

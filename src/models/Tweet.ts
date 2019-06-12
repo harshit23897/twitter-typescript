@@ -11,4 +11,6 @@ const TweetSchema: Schema = new Schema({
   user: { type: Schema.Types.ObjectId, required: true }
 });
 
+TweetSchema.index({ $text: { $tweet: "text" } });
+
 export const Tweet = mongoose.model<ITweet>("Tweet", TweetSchema);
