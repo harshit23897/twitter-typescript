@@ -24,7 +24,6 @@ class Tracking {
         app
             .route("/api/users/add")
             .post((req, res) => __awaiter(this, void 0, void 0, function* () {
-            User_1.User.collection.remove({});
             const handle = req.body.handle;
             this.checkVerifiedUser(handle)
                 .then((response) => {
@@ -75,17 +74,6 @@ class Tracking {
             })
                 .catch((error) => {
                 return res.status(400).json("Some error occured");
-            });
-        });
-        app
-            .route("/api/users/test")
-            .get((req, res) => {
-            const handle = req.body.handle;
-            User_1.User.findOne({ name: handle }).then((user) => {
-                Tweet_1.Tweet.find({ user: user.id }).then((tweets) => {
-                    // tslint:disable-next-line:no-console
-                    console.log(tweets);
-                });
             });
         });
     }

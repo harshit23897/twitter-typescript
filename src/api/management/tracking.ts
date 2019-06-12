@@ -12,7 +12,6 @@ export class Tracking {
     app
       .route("/api/users/add")
       .post(async (req: express.Request, res: express.Response) => {
-        User.collection.remove({});
         const handle: string = req.body.handle;
         this.checkVerifiedUser(handle)
           .then((response) => {
@@ -63,19 +62,6 @@ export class Tracking {
           .catch((error) => {
             return res.status(400).json("Some error occured");
           });
-      });
-
-    app
-      .route("/api/users/test")
-      .get((req: express.Request, res: express.Response) => {
-        const handle = req.body.handle;
-
-        User.findOne({ name: handle }).then((user) => {
-          Tweet.find({ user: user.id }).then((tweets) => {
-            // tslint:disable-next-line:no-console
-            console.log(tweets);
-          });
-        });
       });
   }
 
