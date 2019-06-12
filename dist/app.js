@@ -14,13 +14,16 @@ const bodyParser = __importStar(require("body-parser")); // used to parse the fo
 require("dotenv/config");
 const express_1 = __importDefault(require("express"));
 const mongoose_1 = __importDefault(require("mongoose"));
+const search_1 = require("./api/core/search");
 const tracking_1 = require("./api/management/tracking");
 class App {
     constructor() {
         this.tracking = new tracking_1.Tracking();
+        this.search = new search_1.Search();
         this.app = express_1.default(); // run the express instance and store in app
         this.config();
         this.tracking.routes(this.app);
+        this.search.routes(this.app);
         this.setupDb();
     }
     setupDb() {

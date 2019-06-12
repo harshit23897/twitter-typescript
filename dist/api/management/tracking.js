@@ -16,6 +16,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const connect = __importStar(require("../services/connect"));
+const util_1 = require("util");
 const Tweet_1 = require("../../models/Tweet");
 const User_1 = require("../../models/User");
 class Tracking {
@@ -58,6 +59,10 @@ class Tracking {
                 return res.status(400).json("Some error occured.");
             });
         }));
+        app.route("/test").get((req, res) => {
+            User_1.User.collection.remove({});
+            Tweet_1.Tweet.collection.remove({});
+        });
         // Return list of all verified users.
         app
             .route("/api/users/show")
@@ -118,6 +123,8 @@ class Tracking {
                         const tweet = new Tweet_1.Tweet({ user: user.id, tweet: tText });
                         tweet.save();
                     }
+                    // tslint:disable-next-line:no-console
+                    console.log("Saved all tweets for user " + handle);
                 });
             }));
         });
@@ -131,7 +138,8 @@ class Tracking {
             let flag = 0;
             connect.client.get("statuses/user_timeline", params, (error, tweets, response) => {
                 for (const tweet in tweets) {
-                    if (tweets.hasOwnProperty(tweet)) {
+                    if (tweets.hasOwnProperty(tweet) &&
+                        !util_1.isUndefined(tweets[tweet].created_at)) {
                         const tweetCreationDate = this.findDate(tweets[tweet].created_at);
                         if (tweetCreationDate < startingDate) {
                             ++flag;

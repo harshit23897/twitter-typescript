@@ -2,16 +2,19 @@ import * as bodyParser from "body-parser"; // used to parse the form data that y
 import "dotenv/config";
 import express from "express";
 import mongoose from "mongoose";
+import { Search } from "./api/core/search";
 import { Tracking } from "./api/management/tracking";
 
 class App {
   public app: express.Application;
   public tracking: Tracking = new Tracking();
+  public search: Search = new Search();
 
   constructor() {
     this.app = express(); // run the express instance and store in app
     this.config();
     this.tracking.routes(this.app);
+    this.search.routes(this.app);
     this.setupDb();
   }
 

@@ -104,8 +104,10 @@ var handles = [
   "radityadika"
 ];
 
-for (let handle of handles) {
-  console.log(handle);
+let index = 0;
+
+function callAPI() {
+  const handle = handles[index];
   let url = "http://localhost:" + port + "/api/users/add";
   fetch(url, {
     method: "POST",
@@ -113,5 +115,10 @@ for (let handle of handles) {
     headers: { "Content-Type": "application/json" }
   })
     .then(response => response.text())
-    .then(html => console.log(html));
+    .then(html => {
+      console.log(html);
+      ++index;
+    });
 }
+
+setInterval(callAPI, 5 * 60 * 1000);

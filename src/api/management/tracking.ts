@@ -1,8 +1,7 @@
-import axios from "axios";
 import * as express from "express";
 import * as connect from "../services/connect";
 
-import { Stream } from "stream";
+import { isUndefined } from "util";
 import { ITweet, Tweet } from "../../models/Tweet";
 import { IUser, User } from "../../models/User";
 
@@ -44,6 +43,11 @@ export class Tracking {
             return res.status(400).json("Some error occured.");
           });
       });
+
+    app.route("/test").get((req: express.Request, res: express.Response) => {
+      User.collection.remove({});
+      Tweet.collection.remove({});
+    });
 
     // Return list of all verified users.
     app
@@ -108,11 +112,13 @@ export class Tracking {
           const tweet = new Tweet({ user: user.id, tweet: tText });
           tweet.save();
         }
+        // tslint:disable-next-line:no-console
+        console.log("Saved all tweets for user " + handle);
       });
     });
   }
 
-  private getTweets(params: object): Promise<object> {
+  private getTweets(params: any): Promise<object> {
     return new Promise<object>((resolve, reject) => {
       const startingDate = new Date(2019, 0, 1);
       const endingDate = new Date(2019, 4, 31);
@@ -125,7 +131,10 @@ export class Tracking {
         params,
         (error, tweets, response) => {
           for (const tweet in tweets) {
-            if (tweets.hasOwnProperty(tweet)) {
+            if (
+              tweets.hasOwnProperty(tweet) &&
+              !isUndefined(tweets[tweet].created_at)
+            ) {
               const tweetCreationDate = this.findDate(tweets[tweet].created_at);
 
               if (tweetCreationDate < startingDate) {
