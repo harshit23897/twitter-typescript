@@ -20,12 +20,14 @@ class App {
 
   private setupDb(): void {
     mongoose
-      .connect("mongodb://localhost/twitterdb")
+      .connect("mongodb://mongo:27017/twitterdb")
       .then(() => {
         // tslint:disable-next-line:no-console
         console.log("Mongodb connected.");
       })
       .catch((error: any) => {
+        // tslint:disable-next-line:no-console
+        console.log(error);
         // tslint:disable-next-line:no-console
         console.log("Error in connecting to database");
       });

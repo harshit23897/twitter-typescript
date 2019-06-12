@@ -13,7 +13,7 @@ export class Tracking {
       .post(async (req: express.Request, res: express.Response) => {
         const handle: string = req.body.handle;
         this.checkVerifiedUser(handle)
-          .then((response) => {
+          .then(response => {
             if (response === false) {
               return res
                 .status(400)
@@ -26,7 +26,7 @@ export class Tracking {
                   user = new User({ name: handle });
                   user
                     .save()
-                    .then((result) => {
+                    .then(result => {
                       this.fetchTweets(handle);
                       return res
                         .status(200)
@@ -39,22 +39,17 @@ export class Tracking {
               });
             }
           })
-          .catch((error) => {
+          .catch(error => {
             return res.status(400).json("Some error occured.");
           });
       });
-
-    app.route("/test").get((req: express.Request, res: express.Response) => {
-      User.collection.remove({});
-      Tweet.collection.remove({});
-    });
 
     // Return list of all verified users.
     app
       .route("/api/users/show")
       .get((req: express.Request, res: express.Response) => {
         const users = User.find({})
-          .then((result) => {
+          .then(result => {
             const names = [];
             for (const row in result) {
               if (result.hasOwnProperty(row)) {
@@ -63,7 +58,7 @@ export class Tracking {
             }
             return res.status(200).json(names);
           })
-          .catch((error) => {
+          .catch(error => {
             return res.status(400).json("Some error occured");
           });
       });
@@ -107,7 +102,7 @@ export class Tracking {
         }
       }
 
-      User.findOne({ name: handle }).then((user) => {
+      User.findOne({ name: handle }).then(user => {
         for (const tText of tweetText) {
           const tweet = new Tweet({ user: user.id, tweet: tText });
           tweet.save();

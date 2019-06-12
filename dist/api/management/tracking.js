@@ -59,10 +59,10 @@ class Tracking {
                 return res.status(400).json("Some error occured.");
             });
         }));
-        app.route("/test").get((req, res) => {
-            User_1.User.collection.remove({});
-            Tweet_1.Tweet.collection.remove({});
-        });
+        // app.route("/test").get((req: express.Request, res: express.Response) => {
+        //   User.collection.remove({});
+        //   Tweet.collection.remove({});
+        // });
         // Return list of all verified users.
         app
             .route("/api/users/show")
@@ -86,6 +86,8 @@ class Tracking {
         return __awaiter(this, void 0, void 0, function* () {
             return new Promise((resolve, reject) => {
                 const params = { screen_name: handle };
+                // tslint:disable-next-line:no-console
+                console.log(params);
                 // Check if the user is a verified user.
                 connect.client.get("users/show", params, (error, tweets, response) => {
                     if (!error) {

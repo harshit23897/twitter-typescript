@@ -1,0 +1,24 @@
+version: "3.6"
+services:
+  twitter_typescript:
+    build: .
+    container_name: "twitter_typescript"
+    image: debian/latest
+    volumes:
+      - .:/var/www:rw
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    ports:
+      - 3000:3000
+    links:
+      - mongo
+    depends_on:
+      - mongo
+  mongo:
+    image: mongo:latest
+    container_name: "mongo"
+    ports:
+      - 27017:27017
+    command: mongod --smallfiles --logpath=/dev/null # --quiet
+networks:
+  my-network:
+    driver: bridge
