@@ -9,7 +9,7 @@ export class Search {
       .route("/api/tweets/search")
       .get((req: express.Request, res: express.Response) => {
         const query = req.body.query;
-        Tweet.find({ $text: { $search: query } }).then(result => {
+        Tweet.find({ $text: { $search: query } }).then((result) => {
           const tweets: string[] = [];
           for (const row of result) {
             tweets.push(row.tweet);
@@ -23,12 +23,12 @@ export class Search {
       .get((req: express.Request, res: express.Response) => {
         const userId = req.params.user_id;
         const query = req.body.query;
-        User.findOne({ name: userId }).then(user => {
+        User.findOne({ name: userId }).then((user) => {
           if (!user) {
             return res.status(400).json("Username doesn't exist");
           }
           Tweet.find({ $text: { $search: query }, user: user.id }).then(
-            result => {
+            (result) => {
               const tweets: string[] = [];
               for (const row of result) {
                 tweets.push(row.tweet);

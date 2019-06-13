@@ -13,7 +13,7 @@ export class Tracking {
       .post(async (req: express.Request, res: express.Response) => {
         const handle: string = req.body.handle;
         this.checkVerifiedUser(handle)
-          .then(response => {
+          .then((response) => {
             if (response === false) {
               return res
                 .status(400)
@@ -26,7 +26,7 @@ export class Tracking {
                   user = new User({ name: handle });
                   user
                     .save()
-                    .then(result => {
+                    .then((result) => {
                       this.fetchTweets(handle);
                       return res
                         .status(200)
@@ -39,7 +39,7 @@ export class Tracking {
               });
             }
           })
-          .catch(error => {
+          .catch((error) => {
             return res.status(400).json("Some error occured.");
           });
       });
@@ -48,8 +48,8 @@ export class Tracking {
     app
       .route("/api/users/show")
       .get((req: express.Request, res: express.Response) => {
-        const users = User.find({})
-          .then(result => {
+        User.find({})
+          .then((result) => {
             const names = [];
             for (const row in result) {
               if (result.hasOwnProperty(row)) {
@@ -58,7 +58,7 @@ export class Tracking {
             }
             return res.status(200).json(names);
           })
-          .catch(error => {
+          .catch((error) => {
             return res.status(400).json("Some error occured");
           });
       });
@@ -86,26 +86,37 @@ export class Tracking {
         screen_name: handle
       };
       const tweetText: string[] = [];
+      const retweetCount: number[] = [];
+      const createdAt: Date[] = [];
 
       while (true) {
-        const tempTweetText: any = await this.getTweets(params);
-        tweetText.push(...tempTweetText.tweetText);
+        const tempTweetData: any = await this.getTweets(params);
+        tweetText.push(...tempTweetData.tweetText);
+        retweetCount.push(...tempTweetData.retweetCount);
+        createdAt.push(...tempTweetData.createdAt);
 
         params = {
           count: 200,
-          max_id: tempTweetText.maxId,
+          max_id: tempTweetData.maxId,
           screen_name: handle
         };
 
-        if (tempTweetText.flag > 0) {
+        if (tempTweetData.flag > 0) {
           break;
         }
       }
 
-      User.findOne({ name: handle }).then(user => {
-        for (const tText of tweetText) {
-          const tweet = new Tweet({ user: user.id, tweet: tText });
-          tweet.save();
+      User.findOne({ name: handle }).then((user) => {
+        for (const index in tweetText) {
+          if (tweetText.hasOwnProperty(index)) {
+            const tweet = new Tweet({
+              created_at: createdAt[index],
+              retweet_count: retweetCount[index],
+              tweet: tweetText[index],
+              user: user.id
+            });
+            tweet.save();
+          }
         }
         // tslint:disable-next-line:no-console
         console.log("Saved all tweets for user " + handle);
@@ -118,6 +129,8 @@ export class Tracking {
       const startingDate = new Date(2019, 0, 1);
       const endingDate = new Date(2019, 4, 31);
       const tweetText: string[] = [];
+      const retweetCount: number[] = [];
+      const createdAt: Date[] = [];
       let maxId: number = 0;
       let flag: number = 0;
 
@@ -130,7 +143,9 @@ export class Tracking {
               tweets.hasOwnProperty(tweet) &&
               !isUndefined(tweets[tweet].created_at)
             ) {
-              const tweetCreationDate = this.findDate(tweets[tweet].created_at);
+              const tweetCreationDate = this.formatDate(
+                tweets[tweet].created_at
+              );
 
               if (tweetCreationDate < startingDate) {
                 ++flag;
@@ -140,16 +155,18 @@ export class Tracking {
               if (tweetCreationDate < endingDate) {
                 maxId = tweets[tweet].id;
                 tweetText.push(tweets[tweet].text);
+                retweetCount.push(tweets[tweet].retweet_count);
+                createdAt.push(tweetCreationDate);
               }
             }
           }
-          resolve({ maxId, tweetText, flag });
+          resolve({ maxId, tweetText, flag, retweetCount, createdAt });
         }
       );
     });
   }
 
-  private findDate(date: string): Date {
+  private formatDate(date: string): Date {
     const arr = date.split(" ");
     return new Date(
       parseInt(arr[5], 10),

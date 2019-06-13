@@ -3,24 +3,27 @@ import "dotenv/config";
 import express from "express";
 import mongoose from "mongoose";
 import { Search } from "./api/core/search";
+import { Tweets } from "./api/core/tweets";
 import { Tracking } from "./api/management/tracking";
 
 class App {
   public app: express.Application;
   public tracking: Tracking = new Tracking();
   public search: Search = new Search();
+  public tweets: Tweets = new Tweets();
 
   constructor() {
     this.app = express(); // run the express instance and store in app
     this.config();
     this.tracking.routes(this.app);
     this.search.routes(this.app);
+    this.tweets.routes(this.app);
     this.setupDb();
   }
 
   private setupDb(): void {
     mongoose
-      .connect("mongodb://mongo:27017/twitterdb")
+      .connect("mongodb://localhost:27017/twitterdb")
       .then(() => {
         // tslint:disable-next-line:no-console
         console.log("Mongodb connected.");

@@ -15,20 +15,23 @@ require("dotenv/config");
 const express_1 = __importDefault(require("express"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const search_1 = require("./api/core/search");
+const tweets_1 = require("./api/core/tweets");
 const tracking_1 = require("./api/management/tracking");
 class App {
     constructor() {
         this.tracking = new tracking_1.Tracking();
         this.search = new search_1.Search();
+        this.tweets = new tweets_1.Tweets();
         this.app = express_1.default(); // run the express instance and store in app
         this.config();
         this.tracking.routes(this.app);
         this.search.routes(this.app);
+        this.tweets.routes(this.app);
         this.setupDb();
     }
     setupDb() {
         mongoose_1.default
-            .connect("mongodb://mongo:27017/twitterdb")
+            .connect("mongodb://localhost:27017/twitterdb")
             .then(() => {
             // tslint:disable-next-line:no-console
             console.log("Mongodb connected.");

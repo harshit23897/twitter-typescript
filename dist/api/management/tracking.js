@@ -59,15 +59,11 @@ class Tracking {
                 return res.status(400).json("Some error occured.");
             });
         }));
-        // app.route("/test").get((req: express.Request, res: express.Response) => {
-        //   User.collection.remove({});
-        //   Tweet.collection.remove({});
-        // });
         // Return list of all verified users.
         app
             .route("/api/users/show")
             .get((req, res) => {
-            const users = User_1.User.find({})
+            User_1.User.find({})
                 .then((result) => {
                 const names = [];
                 for (const row in result) {
@@ -86,8 +82,6 @@ class Tracking {
         return __awaiter(this, void 0, void 0, function* () {
             return new Promise((resolve, reject) => {
                 const params = { screen_name: handle };
-                // tslint:disable-next-line:no-console
-                console.log(params);
                 // Check if the user is a verified user.
                 connect.client.get("users/show", params, (error, tweets, response) => {
                     if (!error) {
@@ -108,22 +102,33 @@ class Tracking {
                     screen_name: handle
                 };
                 const tweetText = [];
+                const retweetCount = [];
+                const createdAt = [];
                 while (true) {
-                    const tempTweetText = yield this.getTweets(params);
-                    tweetText.push(...tempTweetText.tweetText);
+                    const tempTweetData = yield this.getTweets(params);
+                    tweetText.push(...tempTweetData.tweetText);
+                    retweetCount.push(...tempTweetData.retweetCount);
+                    createdAt.push(...tempTweetData.createdAt);
                     params = {
                         count: 200,
-                        max_id: tempTweetText.maxId,
+                        max_id: tempTweetData.maxId,
                         screen_name: handle
                     };
-                    if (tempTweetText.flag > 0) {
+                    if (tempTweetData.flag > 0) {
                         break;
                     }
                 }
                 User_1.User.findOne({ name: handle }).then((user) => {
-                    for (const tText of tweetText) {
-                        const tweet = new Tweet_1.Tweet({ user: user.id, tweet: tText });
-                        tweet.save();
+                    for (const index in tweetText) {
+                        if (tweetText.hasOwnProperty(index)) {
+                            const tweet = new Tweet_1.Tweet({
+                                created_at: createdAt[index],
+                                retweet_count: retweetCount[index],
+                                tweet: tweetText[index],
+                                user: user.id
+                            });
+                            tweet.save();
+                        }
                     }
                     // tslint:disable-next-line:no-console
                     console.log("Saved all tweets for user " + handle);
@@ -136,13 +141,15 @@ class Tracking {
             const startingDate = new Date(2019, 0, 1);
             const endingDate = new Date(2019, 4, 31);
             const tweetText = [];
+            const retweetCount = [];
+            const createdAt = [];
             let maxId = 0;
             let flag = 0;
             connect.client.get("statuses/user_timeline", params, (error, tweets, response) => {
                 for (const tweet in tweets) {
                     if (tweets.hasOwnProperty(tweet) &&
                         !util_1.isUndefined(tweets[tweet].created_at)) {
-                        const tweetCreationDate = this.findDate(tweets[tweet].created_at);
+                        const tweetCreationDate = this.formatDate(tweets[tweet].created_at);
                         if (tweetCreationDate < startingDate) {
                             ++flag;
                             break;
@@ -150,14 +157,16 @@ class Tracking {
                         if (tweetCreationDate < endingDate) {
                             maxId = tweets[tweet].id;
                             tweetText.push(tweets[tweet].text);
+                            retweetCount.push(tweets[tweet].retweet_count);
+                            createdAt.push(tweetCreationDate);
                         }
                     }
                 }
-                resolve({ maxId, tweetText, flag });
+                resolve({ maxId, tweetText, flag, retweetCount, createdAt });
             });
         });
     }
-    findDate(date) {
+    formatDate(date) {
         const arr = date.split(" ");
         return new Date(parseInt(arr[5], 10), this.month(arr[1]), parseInt(arr[2], 10));
     }
