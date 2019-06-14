@@ -70,7 +70,7 @@ export class Tracking {
     });
   }
 
-  private async checkVerifiedUser(handle: string): Promise<boolean> {
+  public async checkVerifiedUser(handle: string): Promise<boolean> {
     return new Promise<boolean>((resolve, reject) => {
       const params = { screen_name: handle };
 
@@ -126,7 +126,44 @@ export class Tracking {
         }
         // tslint:disable-next-line:no-console
         console.log("Saved all tweets for user " + handle);
+
+        this.findUserApproachability(handle);
       });
+    });
+  }
+
+  private findUserApproachability(handle: string): void {
+    User.findOne({ name: handle }).then(async (user: IUser) => {
+      await Tweet.find({ user: user.id }).then(async (tweets: ITweet[]) => {
+        await this.findUnverifiedUsers(tweets).then((result: number) => {
+          const frequency = result / tweets.length;
+          user.approachability = frequency;
+          user.save();
+          // tslint:disable-next-line:no-console
+          console.log("Saved approachability for user " + handle);
+        });
+      });
+    });
+  }
+
+  private async findUnverifiedUsers(tweets: ITweet[]): Promise<number> {
+    return new Promise<number>(async (resolve, reject) => {
+      let count = 0;
+      for (const tweet of tweets) {
+        const tweetTextArray = tweet.tweet.split(" ");
+        for (const tweetWord of tweetTextArray) {
+          if (tweetWord[0] === "@") {
+            await this.checkVerifiedUser(tweetWord).then(
+              (response: boolean) => {
+                if (response === false) {
+                  ++count;
+                }
+              }
+            );
+          }
+        }
+      }
+      resolve(count);
     });
   }
 

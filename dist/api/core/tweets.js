@@ -14,10 +14,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const moment_1 = __importDefault(require("moment"));
 const Tweet_1 = require("../../models/Tweet");
 const User_1 = require("../../models/User");
+const tracking_1 = require("../management/tracking");
 class Tweets {
+    constructor() {
+        this.tracking = new tracking_1.Tracking();
+    }
     routes(app) {
         app
-            .route("/api/tweets/maxretweets")
+            .route("/api/users/maxretweets")
             .get((req, res) => {
             let startDate = req.body.start;
             let endDate = req.body.end;
@@ -62,6 +66,24 @@ class Tweets {
                     return a[1] - b[1];
                 });
                 return res.status(200).json(maxRetweetsArray);
+            }));
+        });
+        app
+            .route("/api/users/approachable")
+            .get((req, res) => {
+            User_1.User.find({})
+                .sort({ approachability: -1 })
+                .then((users) => __awaiter(this, void 0, void 0, function* () {
+                const output = [];
+                for (let index = 0; index < users.length; ++index) {
+                    if (index < 5) {
+                        output.push(users[index].name);
+                    }
+                    else {
+                        break;
+                    }
+                }
+                return res.status(200).json(output);
             }));
         });
     }

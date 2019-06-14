@@ -1,13 +1,15 @@
 import * as express from "express";
 import moment from "moment";
 import { isUndefined } from "util";
-import { Tweet } from "../../models/Tweet";
+import { ITweet, Tweet } from "../../models/Tweet";
 import { IUser, User } from "../../models/User";
+import { Tracking } from "../management/tracking";
 
 export class Tweets {
+  private tracking: Tracking = new Tracking();
   public routes(app: express.Application): void {
     app
-      .route("/api/tweets/maxretweets")
+      .route("/api/users/maxretweets")
       .get((req: express.Request, res: express.Response) => {
         let startDate = req.body.start;
         let endDate = req.body.end;
@@ -61,6 +63,24 @@ export class Tweets {
             return res.status(200).json(maxRetweetsArray);
           }
         );
+      });
+
+    app
+      .route("/api/users/approachable")
+      .get((req: express.Request, res: express.Response) => {
+        User.find({})
+          .sort({ approachability: -1 })
+          .then(async (users: IUser[]) => {
+            const output: string[] = [];
+            for (let index = 0; index < users.length; ++index) {
+              if (index < 5) {
+                output.push(users[index].name);
+              } else {
+                break;
+              }
+            }
+            return res.status(200).json(output);
+          });
       });
   }
 

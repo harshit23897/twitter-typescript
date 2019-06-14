@@ -140,7 +140,41 @@ class Tracking {
                     }
                     // tslint:disable-next-line:no-console
                     console.log("Saved all tweets for user " + handle);
+                    this.findUserApproachability(handle);
                 });
+            }));
+        });
+    }
+    findUserApproachability(handle) {
+        User_1.User.findOne({ name: handle }).then((user) => __awaiter(this, void 0, void 0, function* () {
+            yield Tweet_1.Tweet.find({ user: user.id }).then((tweets) => __awaiter(this, void 0, void 0, function* () {
+                yield this.findUnverifiedUsers(tweets).then((result) => {
+                    const frequency = result / tweets.length;
+                    user.approachability = frequency;
+                    user.save();
+                    // tslint:disable-next-line:no-console
+                    console.log("Saved approachability for user " + handle);
+                });
+            }));
+        }));
+    }
+    findUnverifiedUsers(tweets) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+                let count = 0;
+                for (const tweet of tweets) {
+                    const tweetTextArray = tweet.tweet.split(" ");
+                    for (const tweetWord of tweetTextArray) {
+                        if (tweetWord[0] === "@") {
+                            yield this.checkVerifiedUser(tweetWord).then((response) => {
+                                if (response === false) {
+                                    ++count;
+                                }
+                            });
+                        }
+                    }
+                }
+                resolve(count);
             }));
         });
     }
