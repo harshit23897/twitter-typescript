@@ -1,13 +1,13 @@
 version: 2
-    jobs:
-      build:
-        environment:
-          IMAGE_NAME: twitter_typescript
-        docker:
-          - image: circleci/buildpack-deps:stretch
-        steps:
-          - checkout
-          - setup_remote_docker
-          - run:
-              name: Build Docker image
-              command: docker build -t $IMAGE_NAME:latest .
+jobs:
+  build:
+    environment:
+      IMAGE_NAME: twitter_typescript
+    docker:
+      - image: circleci/buildpack-deps:stretch
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Build Docker image
+          command: docker build -t $IMAGE_NAME:latest .
