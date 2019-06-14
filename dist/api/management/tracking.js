@@ -7,6 +7,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
@@ -15,6 +18,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const moment_1 = __importDefault(require("moment"));
 const connect = __importStar(require("../services/connect"));
 const util_1 = require("util");
 const Tweet_1 = require("../../models/Tweet");
@@ -122,7 +126,7 @@ class Tracking {
                     for (const index in tweetText) {
                         if (tweetText.hasOwnProperty(index)) {
                             const tweet = new Tweet_1.Tweet({
-                                created_at: createdAt[index],
+                                created_at: createdAt[index].utc().toDate(),
                                 retweet_count: retweetCount[index],
                                 tweet: tweetText[index],
                                 user: user.id
@@ -138,8 +142,8 @@ class Tracking {
     }
     getTweets(params) {
         return new Promise((resolve, reject) => {
-            const startingDate = new Date(2019, 0, 1);
-            const endingDate = new Date(2019, 4, 31);
+            const startingDate = moment_1.default("2019-01-01").utc();
+            const endingDate = moment_1.default("2019-04-31").utc();
             const tweetText = [];
             const retweetCount = [];
             const createdAt = [];
@@ -150,11 +154,11 @@ class Tracking {
                     if (tweets.hasOwnProperty(tweet) &&
                         !util_1.isUndefined(tweets[tweet].created_at)) {
                         const tweetCreationDate = this.formatDate(tweets[tweet].created_at);
-                        if (tweetCreationDate < startingDate) {
+                        if (tweetCreationDate.isBefore(startingDate)) {
                             ++flag;
                             break;
                         }
-                        if (tweetCreationDate < endingDate) {
+                        if (tweetCreationDate.isBefore(endingDate)) {
                             maxId = tweets[tweet].id;
                             tweetText.push(tweets[tweet].text);
                             retweetCount.push(tweets[tweet].retweet_count);
@@ -167,8 +171,8 @@ class Tracking {
         });
     }
     formatDate(date) {
-        const arr = date.split(" ");
-        return new Date(parseInt(arr[5], 10), this.month(arr[1]), parseInt(arr[2], 10));
+        const d = date.split(" ");
+        return moment_1.default(d[5] + "-" + this.month(d[1]) + "-" + d[2] + "T" + d[3] + "+00:00").utc();
     }
     month(monthName) {
         const months = [
@@ -185,7 +189,11 @@ class Tracking {
             "Nov",
             "Dec"
         ];
-        return months.indexOf(monthName);
+        let mIndex = months.indexOf(monthName).toString();
+        if (mIndex.length < 2) {
+            mIndex = "0" + mIndex;
+        }
+        return mIndex;
     }
 }
 exports.Tracking = Tracking;

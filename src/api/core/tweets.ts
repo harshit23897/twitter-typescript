@@ -18,13 +18,11 @@ export class Tweets {
         ) {
           return res.status(400).json("Invalid date or date not within range");
         }
-
-        // Date format - Day/Month/Year Hours:Minutes:Seconds
       });
   }
 
   private isDateWithinRange(date: string): boolean {
-    const d = moment(date);
-    return d.isValid() && d.isAfter("2018-12-31") && d.isBefore("2019-05-01");
+    const d = moment(date, "YYYY-MM-DD hh:mm:ss");
+    return d.isValid() && d.isBetween("2019-01-01", "2019-04-30");
   }
 }
