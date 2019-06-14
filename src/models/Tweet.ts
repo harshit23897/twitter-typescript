@@ -12,10 +12,8 @@ export interface ITweet extends Document {
 const TweetSchema: Schema = new Schema({
   created_at: { type: Date, required: true },
   retweet_count: { type: Number, required: true },
-  tweet: { type: String, required: true },
+  tweet: { type: String, required: true, text: true },
   user: { type: Schema.Types.ObjectId, required: true }
 });
-
-TweetSchema.index({ $text: { $tweet: "text" } });
 
 export const Tweet = mongoose.model<ITweet>("Tweet", TweetSchema);

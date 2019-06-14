@@ -52,7 +52,7 @@ export class Tweets {
             }
           ],
           async (err: any, result: any) => {
-            const maxRetweetsArray: any = [];
+            let maxRetweetsArray: any = [];
             for (const r of result) {
               await User.findOne({ _id: r._id }).then((user: IUser) => {
                 const username = user.name;
@@ -60,8 +60,8 @@ export class Tweets {
                 maxRetweetsArray.push({ username, totalRetweets });
               });
             }
-            maxRetweetsArray.sort((a: any, b: any) => {
-              return a[1] - b[1];
+            maxRetweetsArray = maxRetweetsArray.sort((a: any, b: any) => {
+              return a.totalRetweets < b.totalRetweets;
             });
             return res.status(200).json(maxRetweetsArray);
           }
