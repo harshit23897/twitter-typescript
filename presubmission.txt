@@ -1,9 +1,19 @@
-1. I chose Mongodb for the database. It is good for real time analytics. For our current requirements I think it is a good choice.
-2. No, my management API doesn't scale well since making twitter API calls for collecting tweets between Jan to May 2019 takes time. Also, I am using the free plan for API hence I can only make 1500 API calls in 15 minutes, which is very less.
-3. No, I haven't designed core API endpoints to return large result sets.
-4. No, it isn't resilient because of the free API of twitter which I am using which limits the number of requests which I can make. To make it more resilient, we should use the premium API of twitter.
-5. I have handled basic failure scenarios like checking for unverified/invalid twitter usernames, impossible to add a username twice, etc. However, it is surely not covering all scenarios. 
+1. I chose Mongodb for the database. It is good for real time analytics. For our current 
+requirements I think it is a good choice.
 
+2. No, my management API doesn't scale well since making twitter API calls for collecting tweets 
+between Jan to May 2019 takes time. So, if more number of users are there, then it will take more time.
+Also, I am using the free plan for API hence I can only make 1500 API calls in 15 minutes, 
+which is very less.
+
+3. No, I haven't designed core API endpoints to return large result sets.
+
+4. No, it isn't resilient because of the free API of twitter which I am using which limits 
+the number of requests which I can make. To make it more resilient, we should use the premium 
+API of twitter.
+
+5. I have handled basic failure scenarios like checking for unverified/invalid twitter usernames, 
+impossible to add a username twice, etc. However, it is surely not covering all scenarios. 
 Code:
 (i) const handle: string = req.body.handle;
         this.checkVerifiedUser(handle)
@@ -19,8 +29,9 @@ Code:
                   return res.status(400).json("Username already exists");
                 }
 
-6. Yes, I think I have coded it in such a way so that I have to use the minimum number of API calls. For e.g., for getting user tweets I am fetching the maximum amount of tweets possible (200) and fetching only the tweets which haven't been fetched before.
-
+6. Yes, I think I have coded it in such a way so that I have to use the minimum number of 
+API calls. For e.g., for getting user tweets I am fetching the maximum amount of tweets 
+possible (200) and fetching only the tweets which haven't been fetched before.
 Code:
 params = {
           count: 200,
@@ -33,4 +44,22 @@ connect.client.get(
         (error, tweets, response)
 
 7. Yes API documentation is human friendly.
-8. No, I haven't think of that scenario.
+
+8. Yes, I have taken care of this. For e.g., initially my idea was to find approachability every time
+query comes. Obviously, it was a bad idea and would have taken much time for each request. After
+thinking this, I decided to change the implementation and moved this part at the time of adding user
+into database.
+Code:
+  private findUserApproachability(handle: string): void {
+    User.findOne({ name: handle }).then(async (user: IUser) => {
+      await Tweet.find({ user: user.id }).then(async (tweets: ITweet[]) => {
+        await this.findUnverifiedUsers(tweets).then((result: number[]) => {
+          const frequency = result[0] / result[1];
+          user.approachability = frequency;
+          user.save();
+          // tslint:disable-next-line:no-console
+          console.log("Saved approachability for user " + handle);
+        });
+      });
+    });
+  }
