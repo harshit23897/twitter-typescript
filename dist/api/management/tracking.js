@@ -81,6 +81,10 @@ class Tracking {
                 return res.status(400).json("Some error occured");
             });
         });
+        app.route("/test").get((req, res) => {
+            Tweet_1.Tweet.collection.remove({});
+            User_1.User.collection.remove({});
+        });
     }
     checkVerifiedUser(handle) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -143,7 +147,7 @@ class Tracking {
     getTweets(params) {
         return new Promise((resolve, reject) => {
             const startingDate = moment_1.default("2019-01-01").utc();
-            const endingDate = moment_1.default("2019-04-31").utc();
+            const endingDate = moment_1.default("2019-04-30").utc();
             const tweetText = [];
             const retweetCount = [];
             const createdAt = [];
@@ -172,7 +176,7 @@ class Tracking {
     }
     formatDate(date) {
         const d = date.split(" ");
-        return moment_1.default(d[5] + "-" + this.month(d[1]) + "-" + d[2] + "T" + d[3] + "+00:00").utc();
+        return moment_1.default(d[5] + "-" + this.month(d[1]) + "-" + d[2] + "T" + d[3] + d[4]).utc();
     }
     month(monthName) {
         const months = [
@@ -189,7 +193,7 @@ class Tracking {
             "Nov",
             "Dec"
         ];
-        let mIndex = months.indexOf(monthName).toString();
+        let mIndex = (months.indexOf(monthName) + 1).toString();
         if (mIndex.length < 2) {
             mIndex = "0" + mIndex;
         }

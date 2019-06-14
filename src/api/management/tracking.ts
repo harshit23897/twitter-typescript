@@ -63,6 +63,11 @@ export class Tracking {
             return res.status(400).json("Some error occured");
           });
       });
+
+    app.route("/test").get((req: express.Request, res: express.Response) => {
+      Tweet.collection.remove({});
+      User.collection.remove({});
+    });
   }
 
   private async checkVerifiedUser(handle: string): Promise<boolean> {
@@ -128,7 +133,7 @@ export class Tracking {
   private getTweets(params: any): Promise<object> {
     return new Promise<object>((resolve, reject) => {
       const startingDate = moment("2019-01-01").utc();
-      const endingDate = moment("2019-04-31").utc();
+      const endingDate = moment("2019-04-30").utc();
       const tweetText: string[] = [];
       const retweetCount: number[] = [];
       const createdAt: moment.Moment[] = [];
@@ -170,7 +175,7 @@ export class Tracking {
   private formatDate(date: string): moment.Moment {
     const d = date.split(" ");
     return moment(
-      d[5] + "-" + this.month(d[1]) + "-" + d[2] + "T" + d[3] + "+00:00"
+      d[5] + "-" + this.month(d[1]) + "-" + d[2] + "T" + d[3] + d[4]
     ).utc();
   }
 
@@ -189,7 +194,7 @@ export class Tracking {
       "Nov",
       "Dec"
     ];
-    let mIndex: string = months.indexOf(monthName).toString();
+    let mIndex: string = (months.indexOf(monthName) + 1).toString();
     if (mIndex.length < 2) {
       mIndex = "0" + mIndex;
     }
