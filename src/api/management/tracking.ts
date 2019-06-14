@@ -8,7 +8,11 @@ import { IUser, User } from "../../models/User";
 
 export class Tracking {
   public routes(app: express.Application): void {
-    // Add a verified user to database.
+    /**
+     * Add a verified user to database.
+     *
+     */
+
     app
       .route("/api/users/add")
       .post(async (req: express.Request, res: express.Response) => {
@@ -22,6 +26,7 @@ export class Tracking {
             } else {
               User.findOne({ name: handle }).then((user: IUser) => {
                 if (user) {
+                  // If this is a valid username but it already exists.
                   return res.status(400).json("Username already exists");
                 } else {
                   user = new User({ name: handle });
@@ -45,7 +50,11 @@ export class Tracking {
           });
       });
 
-    // Return list of all verified users.
+    /**
+     * Return list of all verified users.
+     *
+     */
+
     app
       .route("/api/users/show")
       .get((req: express.Request, res: express.Response) => {
@@ -70,6 +79,10 @@ export class Tracking {
     });
   }
 
+  /**
+   * Check if a user is verified with the help of twitter API.
+   *
+   */
   public async checkVerifiedUser(handle: string): Promise<boolean> {
     return new Promise<boolean>((resolve, reject) => {
       const params = { screen_name: handle };
@@ -85,6 +98,10 @@ export class Tracking {
     });
   }
 
+  /**
+   * Fetches tweets of a user between 01/01/2019 to 30/04/2019
+   *
+   */
   private async fetchTweets(handle: string): Promise<boolean> {
     return new Promise<boolean>(async (resolve, reject) => {
       let params: any = {
@@ -132,11 +149,15 @@ export class Tracking {
     });
   }
 
+  /**
+   * Find the approachability of a user.
+   *
+   */
   private findUserApproachability(handle: string): void {
     User.findOne({ name: handle }).then(async (user: IUser) => {
       await Tweet.find({ user: user.id }).then(async (tweets: ITweet[]) => {
-        await this.findUnverifiedUsers(tweets).then((result: number) => {
-          const frequency = result / tweets.length;
+        await this.findUnverifiedUsers(tweets).then((result: number[]) => {
+          const frequency = result[0] / result[1];
           user.approachability = frequency;
           user.save();
           // tslint:disable-next-line:no-console
@@ -146,27 +167,41 @@ export class Tracking {
     });
   }
 
-  private async findUnverifiedUsers(tweets: ITweet[]): Promise<number> {
-    return new Promise<number>(async (resolve, reject) => {
+  /**
+   * Helper function to find tweets with mentions of unverified users and tweets with any mentions.
+   *
+   */
+  private async findUnverifiedUsers(tweets: ITweet[]): Promise<number[]> {
+    return new Promise<number[]>(async (resolve, reject) => {
       let count = 0;
+      let totalCount = 0;
       for (const tweet of tweets) {
         const tweetTextArray = tweet.tweet.split(" ");
+        let tempCount = 0;
+        let tempTotalCount = 0;
         for (const tweetWord of tweetTextArray) {
           if (tweetWord[0] === "@") {
+            ++tempTotalCount;
             await this.checkVerifiedUser(tweetWord).then(
               (response: boolean) => {
                 if (response === false) {
-                  ++count;
+                  ++tempCount;
                 }
               }
             );
           }
         }
+        count += tempCount > 0 ? 1 : 0;
+        totalCount += tempTotalCount > 0 ? 1 : 0;
       }
-      resolve(count);
+      resolve([count, totalCount]);
     });
   }
 
+  /**
+   * Helper function to fetch tweets of a user from twitter API.
+   *
+   */
   private getTweets(params: any): Promise<object> {
     return new Promise<object>((resolve, reject) => {
       const startingDate = moment("2019-01-01").utc();
@@ -209,6 +244,10 @@ export class Tracking {
     });
   }
 
+  /**
+   * Helper function to format date (received from tweet object) into standard format.
+   *
+   */
   private formatDate(date: string): moment.Moment {
     const d = date.split(" ");
     return moment(
@@ -216,6 +255,10 @@ export class Tracking {
     ).utc();
   }
 
+  /**
+   * Helper function to convert month name to month ID.
+   *
+   */
   private month(monthName: string): string {
     const months = [
       "Jan",

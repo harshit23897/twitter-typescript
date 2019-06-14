@@ -10,10 +10,10 @@ services:
     ports:
       - 3000:3000
     links:
-      - mongo
+      - localhost
     depends_on:
-      - mongo
-  mongo:
+      - localhost
+  localhost:
     image: mongo:latest
     container_name: "mongo"
     ports:

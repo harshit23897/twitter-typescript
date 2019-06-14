@@ -8,6 +8,10 @@ import { Tracking } from "../management/tracking";
 export class Tweets {
   private tracking: Tracking = new Tracking();
   public routes(app: express.Application): void {
+    /**
+     * Find users with maximum retweets of all tweets posted within range.
+     *
+     */
     app
       .route("/api/users/maxretweets")
       .get((req: express.Request, res: express.Response) => {
@@ -28,7 +32,6 @@ export class Tweets {
           .utc()
           .toDate();
 
-        // tslint:disable-next-line:no-console
         Tweet.aggregate(
           [
             {
@@ -65,6 +68,10 @@ export class Tweets {
         );
       });
 
+    /**
+     * Find users who are more approachable.
+     *
+     */
     app
       .route("/api/users/approachable")
       .get((req: express.Request, res: express.Response) => {
@@ -84,6 +91,10 @@ export class Tweets {
       });
   }
 
+  /**
+   * Check if the date is a valid date and whether it is within range of 01/01/2019 to 30/04/2019
+   *
+   */
   private isDateWithinRange(date: string): boolean {
     const d = moment(date, "YYYY-MM-DD hh:mm:ss").utc();
     return d.isValid() && d.isBetween("2018-12-31", "2019-05-01");

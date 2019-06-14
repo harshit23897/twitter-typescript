@@ -5,6 +5,9 @@ import { User } from "../../models/User";
 
 export class Search {
   public routes(app: express.Application): void {
+    /**
+     * Search query in tweets of all users.
+     */
     app
       .route("/api/tweets/search")
       .get((req: express.Request, res: express.Response) => {
@@ -18,6 +21,9 @@ export class Search {
         });
       });
 
+    /**
+     * Search query in tweets of a particular user.
+     */
     app
       .route("/api/tweets/search/:user_id")
       .get((req: express.Request, res: express.Response) => {
